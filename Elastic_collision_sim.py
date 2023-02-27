@@ -43,6 +43,40 @@ class Box():
 
         return tiles, num_tiles_x, num_tiles_y
     def get_colliding_tiles(self, part_l):
+    # Create a set to store tiles that contain more than one circle
+        colliding_tiles = set()
+
+        # Create a dictionary to store the circle indices for each tile
+        tile_circles = {}
+
+        # Loop through all circles and add them to the dictionary for each tile they overlap with
+        for i, part in enumerate(part_l):
+            # Determine the bounding box of the circle
+            x, y, r = part.pos[0], part.pos[1], part.R
+            bbox = pygame.Rect(x - r, y - r, 2 * r, 2 * r)
+
+            # Determine the range of tiles that the bounding box of the circle overlaps with
+            min_x = int(bbox.left // self.tile_size)
+            max_x = int(bbox.right // self.tile_size) + 1
+            min_y = int(bbox.top // self.tile_size)
+            max_y = int(bbox.bottom // self.tile_size) + 1
+
+            # Add the circle to the dictionary for each tile it overlaps with
+            for x, y in itertools.product(range(min_x, max_x), range(min_y, max_y)):
+                if x >= 0 and x < self.num_tiles_x and y >= 0 and y < self.num_tiles_y:
+                    tile_index = y * self.num_tiles_x + x
+                    if tile_index not in tile_circles:
+                        tile_circles[tile_index] = []
+                    tile_circles[tile_index].append(i)
+
+        # Add the tiles that contain more than one circle to the set of colliding tiles
+        for tile_index, circle_indices in tile_circles.items():
+            if len(circle_indices) > 1:
+                colliding_tiles.add(tile_index)
+
+        return colliding_tiles, tile_circles
+'''
+    def get_colliding_tiles(self, part_l):
         # Create a set to store tiles that contain more than one circle
         colliding_tiles = set()
 
@@ -58,7 +92,7 @@ class Box():
                 tile_circles[i] = intersecting_circles
 
         return colliding_tiles, tile_circles
-
+'''
 
 class Particle():
     def __init__(self, posx, posy, R,surface):
@@ -70,8 +104,11 @@ class Particle():
         self.v = (self.vy, self.vx)
         self.R = R 
         self.m = np.random.randint(1,20)
+        #self.col = (np.random.randint(1,250),np.random.randint(1,250),np.random.randint(1,250))
+        #print(self.vx,self.vy)
+        self.col = (abs(int(self.vx*50)), abs(int(self.vy*50)), self.m)
         #self.circ = pygame.draw.circle(surface, RED, self.pos, 3)
-        self.circ = pygame.draw.circle(surface, RED, (posx,posy), R)
+        self.circ = pygame.draw.circle(surface, self.col, (posx,posy), R)
         #pygame.draw.rect(fake_screen, GREEN, self.shape)
     def set_vel(self, vx, vy):
         self.vx = vx
@@ -100,7 +137,7 @@ class Particle():
         self.pos = (new_pos_x, new_pos_y)
         
         #self.circ = self.circ.move(new_pos_x, new_pos_y)
-        self.circ = pygame.draw.circle(surface, RED, (new_pos_x, new_pos_y), self.R)
+        self.circ = pygame.draw.circle(surface, self.col, (new_pos_x, new_pos_y), self.R)
     def collides_with(self, other):
         distance = math.sqrt((self.pos[0] - other.pos[0])**2 + (self.pos[1] - other.pos[1])**2)
         return distance <= self.R + other.R
@@ -129,7 +166,7 @@ class Sim():
         radii = []
         
         for i in range(num_particles):
-            print('nuts')
+            #print('nuts')
             r = np.random.randint(3, self.Radius_max)
             if any(abs(r - x) < x_max//num_particles for x in radii):
                 r = np.random.randint(3, self.Radius_max)
@@ -138,7 +175,7 @@ class Sim():
             x = np.random.randint(x_0+r+1, x_max-r-1)
             y = np.random.randint(y_0+r+1, y_max-r-1)
             self.part_l.append(Particle(x, y, r, self.surface))
-            print(x,y,r)
+            #print(x,y,r)
     def step(self):
         fake_screen = self.surface.copy()
         fake_screen.fill(BACKGROUND)
@@ -199,7 +236,7 @@ class Sim():
         vy1f = (v1iy * (m1 - m2) + 2 * m2 * v2iy + m1 * v1ix * v1iy - m2 * v2ix * v2iy) / (m1 + m2)
         vx2f = (v2ix * (m2 - m1) + 2 * m1 * v1ix + m2 * v2iy ** 2 - m1 * v1iy ** 2) / (m1 + m2)
         vy2f = (v2iy * (m2 - m1) + 2 * m1 * v1iy + m2 * v2ix * v2iy - m1 * v1ix * v1iy) / (m1 + m2)
-        print(vx1f, vy1f, vx2f, vy2f)
+        #print(vx1f, vy1f, vx2f, vy2f)
          # Normalize the final velocities to ensure that the maximum velocity is 1.0
         max_vel = max(abs(vx1f), abs(vy1f), abs(vx2f), abs(vy2f))
         if max_vel > 0.0:
@@ -225,9 +262,8 @@ class Sim():
         pos2_list = list(part2.pos)
         
         if overlap > 0:
-            nudge = overlap * 2
-            #direction = part1[i].pos - particles[j].pos
-            #unit_direction = direction / dist
+            nudge = overlap*1.2
+            
             # Move the particles apart in proportion to their masses
             total_mass = m1 + m2
             new_pos1x += nudge * (m2 / total_mass) * (new_pos1x - new_pos2x) / dist
@@ -236,24 +272,34 @@ class Sim():
             new_pos2y -= nudge * (m1 / total_mass) * (new_pos1y - new_pos2y) / dist
             part1.pos = (new_pos1x, new_pos1y)
             part2.pos = (new_pos2x, new_pos2y)
-            part1.circ = pygame.draw.circle(self.surface, RED, (new_pos1x, new_pos1y),part1.R)
-            part2.circ = pygame.draw.circle(self.surface, RED, (new_pos2x, new_pos2y), part2.R)
-
-        # Return the final velocities' components
+            part1.circ = pygame.draw.circle(self.surface, part1.col, (new_pos1x, new_pos1y),part1.R)
+            part2.circ = pygame.draw.circle(self.surface, part2.col, (new_pos2x, new_pos2y), part2.R)
+            #dist = math.sqrt((new_pos1x - new_pos2x) ** 2 + (new_pos1y - new_pos2y) ** 2)
+            #overlap = (part1.R + part2.R) - dist
+            #if overlap > 0:
+            # Reflect velocities and add a small random nudge to escape overalps
+            #vx1f += np.random.randint(1,2)/100
+            #vy1f += np.random.randint(1,2)/100
+            #vx2f += np.random.randint(1,2)/100
+            #vy2f += np.random.randint(1,2)/100
+            #vx1f *= -1
+            #vy1f *= -1
+            #vx2f *= -1
+            #vy2f *= -1
+            #vx1f += np.random.randint(20,30)/100
+            ##vy1f += np.random.randint(20,30)/100
+            #vx2f += np.random.randint(20,30)/100
+            #vy2f += np.random.randint(20,30)/100
+            #vx1f += np.random.normal(0,1)
+            #vy1f += np.random.normal(0,1)
+            #vx2f += np.random.normal(0,1)
+            #vy2f += np.random.normal(0,1)
             
-            vx1f *= -1
-            vy1f *= -1
-            vx2f *= -1
-            vy2f *= -1
-            vx1f += np.random.randint(20,30)/100
-            vy1f += np.random.randint(20,30)/100
-            vx2f += np.random.randint(20,30)/100
-            vy2f += np.random.randint(20,30)/100
 
         return vx1f, vy1f, vx2f, vy2f
     
 
-simulation = Sim(0,0,900,900,50,500)
+simulation = Sim(0,0,900,900,1,500)
 clock =pygame.time.Clock()
 
 while True:
@@ -262,4 +308,4 @@ while True:
             pygame.quit()
     pygame.display.flip()
     simulation.step()
-    clock.tick(60)
+    clock.tick(120)
