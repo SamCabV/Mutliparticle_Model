@@ -2,7 +2,7 @@
 
 This project is a simple collision model built on pygame for the Scientific Computing class at Olin College of Engineering during the Spring semester of 2023. The motivation behind the model is the fact that elastic collision models can serve as simple models for colloidial glass transition. It uses uniform grid partitioning to speed up the search for colliding particles.
 
-![1200 Particles](/pics/1200.gif)
+![](/pics/1200.gif)
 
 ## Installation
 To run the script, you will need to install Pygame. You can do this using pip:
