@@ -51,22 +51,22 @@ Changing Slope of Mean Square Distance vs. Number of Particles
 
 Mean Square Distance vs. Number of Particles
 
-![Mean Square Distance vs. 50](/pics/msd50.png)
+![Mean Square Distance vs. 50](/pics/msd50.PNG)
 
-![Mean Square Distance vs. 1200](/pics/msd1200.png)
+![Mean Square Distance vs. 1200](/pics/msd1200.PNG)
 
-![Mean Square Distance vs. 3000](/pics/msd3000.png)
+![Mean Square Distance vs. 3000](/pics/msd3000.PNG)
 
 
 Brownian Motion of Particles with Increasing Number of Particles
 
-![Brownian Motion 50 Particles](/pics/brownian_50.png)
+![Brownian Motion 50 Particles](/pics/brownian_50.PNG)
 Brownian Motion with 50 Particles
 
-![Brownian Motion 1200 Particles](/pics/brownian_1200.png)
+![Brownian Motion 1200 Particles](/pics/brownian_1200.PNG)
 Brownian Motion with 1200 Particles
 
-![Brownian Motion 3000 Particles](/pics/brownian_3000.png)
+![Brownian Motion 3000 Particles](/pics/brownian_3000.PNG)
 
 Brownian Motion with 3000 Particles
 
