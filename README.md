@@ -63,7 +63,7 @@ Brownian Motion of Particles with Increasing Number of Particles
 ![Brownian Motion 50 Particles](/pics/brownian_50.PNG)
 Brownian Motion with 50 Particles
 
-![Brownian Motion 1200 Particles](/pics/brownian_1200.PNG)
+![Brownian Motion 1200 Particles](/pics/brownian_1200.png)
 Brownian Motion with 1200 Particles
 
 ![Brownian Motion 3000 Particles](/pics/brownian_3000.PNG)
